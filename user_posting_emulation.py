@@ -1,5 +1,6 @@
 import requests
 from time import sleep
+import datetime
 import random
 from multiprocessing import Process
 import boto3
@@ -54,16 +55,53 @@ def run_infinite_post_data_loop():
             
             for row in user_selected_row:
                 user_result = dict(row._mapping)
-            
-            print(pin_result)
-            print(geo_result)
-            print(user_result)
 
+
+            invoke_url1 = "https://9cffizextl.execute-api.us-east-1.amazonaws.com/production/topics/0e2b04098249.pin"
+            payload1 = json.dumps({
+    "records": [
+        {
+      "value": {"index": pin_result["index"], "unique_id": pin_result["unique_id"], "title": pin_result["title"], "description": pin_result["description"], "poster_name": pin_result["poster_name"], 
+       "follower_count": pin_result["follower_count"], "tag_list": pin_result["tag_list"], "is_image_or_video": pin_result["is_image_or_video"], "image_src": pin_result["image_src"], "downloaded": pin_result["downloaded"], 
+       "save_location": pin_result["save_location"], "category": pin_result["category"]}
+        }
+    ]
+})
+            
+
+            invoke_url2 = "https://9cffizextl.execute-api.us-east-1.amazonaws.com/production/topics/0e2b04098249.geo"
+            payload2 = json.dumps({
+    "records": [
+        {
+      "value": {"ind": geo_result["ind"], "timestamp": geo_result["timestamp"].strftime("%Y-%m-%d %H:%M:%S"), "latitude": geo_result["latitude"], "longitude": geo_result["longitude"], "country": geo_result["country"]}
+        }
+    ]
+})
+            
+
+            invoke_url3 = "https://9cffizextl.execute-api.us-east-1.amazonaws.com/production/topics/0e2b04098249.user"
+            payload3 = json.dumps({
+    "records": [
+        {
+      "value": {"ind": user_result["ind"], "first_name": user_result["first_name"], "last_name": user_result["last_name"], "age": user_result["age"], "date_joined": user_result["date_joined"].strftime("%Y-%m-%d %H:%M:%S")}
+        }
+    ]
+})
+            
+            headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
+
+            response1 = requests.request("POST", invoke_url1, headers=headers, data=payload1)
+            response2 = requests.request("POST", invoke_url2, headers=headers, data=payload2)
+            response3 = requests.request("POST", invoke_url3, headers=headers, data=payload3)
+            print(response1.status_code)
+            print(response2.status_code)
+            print(response3.status_code)
+    
 
 if __name__ == "__main__":
     run_infinite_post_data_loop()
-    print('Working')
-    
+    # print('Working')
+
     
 
 
